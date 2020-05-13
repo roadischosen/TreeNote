@@ -1636,7 +1636,7 @@ class MainWindow(QMainWindow):
         if count == 0:
             self.reminder_label.setText('')
         else:
-            self.reminder_label.setText('<b><font color=red>' + self.tr('‼‼‼‼‼‼‼‼‼‼‼‼‼‼ Check your reminders ‼‼‼‼‼‼‼‼‼‼‼‼‼‼</font><b>'))
+            self.reminder_label.setText('<b><font color=yellow>' + self.tr('Check your reminders!</font><b>'))
 
     def split_window(self):  # creates another item_view
         new_column = QWidget()
