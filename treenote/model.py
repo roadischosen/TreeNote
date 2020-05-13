@@ -138,7 +138,7 @@ class TreeModel(QAbstractItemModel):
         return None
 
     def columnCount(self, parent=None):
-        return 3
+        return len(self.rootItem.header_list)
 
     def flags(self, index):
         if not index.isValid():

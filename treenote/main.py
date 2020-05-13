@@ -234,8 +234,6 @@ class MainWindow(QMainWindow):
         self.bookmarks_view.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.bookmarks_view.setContextMenuPolicy(Qt.CustomContextMenu)
         self.bookmarks_view.customContextMenuRequested.connect(self.open_edit_bookmark_contextmenu)
-        self.bookmarks_view.hideColumn(1)
-        self.bookmarks_view.hideColumn(2)
         self.bookmarks_view.setUniformRowHeights(True)  # improves performance
         self.bookmarks_view.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
 
