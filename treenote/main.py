@@ -767,8 +767,11 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, event):
         settings = self.getQSettings()
+        if self.isMaximized():
+            settings.remove('size')
+        else:
+            settings.setValue('size', self.size())
         settings.setValue('pos', self.pos())
-        settings.setValue('size', self.size())
         settings.setValue('mainSplitter', self.mainSplitter.saveState())
         settings.setValue('first_column_splitter', self.third_column_splitter.saveState())
         settings.setValue('fontsize', self.fontsize)
