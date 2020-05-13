@@ -77,7 +77,7 @@ class ExportThread(QThread):
     def run(self):
         splitted_path = os.path.split(self.main_window.save_path)
         path = os.path.join(self.main_window.backup_folder,
-                            splitted_path[-1].replace('.treenote', '') + '_' + get_current_date_time_string())
+                            splitted_path[-1].replace('.treenote', ''))
         self.main_window.save_json(path + '.json')
 
 
@@ -1849,7 +1849,7 @@ class MainWindow(QMainWindow):
             return dic
 
         try:
-            json.dump((self.item_model.rootItem, self.bookmark_model.rootItem), open(path, 'w'), default=json_encoder)
+            json.dump((self.item_model.rootItem, self.bookmark_model.rootItem), open(path, 'w'), indent=2, default=json_encoder)
         except FileNotFoundError:
             self.popup_json_save_failed.emit()
 
