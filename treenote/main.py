@@ -15,7 +15,7 @@ from traceback import format_exception
 #
 from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot, QPoint, QModelIndex, QMimeData, QObject, QLocale, QTranslator, \
     QLibraryInfo, Qt, QSettings, QParallelAnimationGroup, QPropertyAnimation, QTimer, QItemSelectionModel, \
-    QItemSelection, QDate, QSize, QTime, QFileInfo, QUrl, QAbstractAnimation, QRectF
+    QItemSelection, QDate, QSize, QTime, QFileInfo, QUrl, QAbstractAnimation, QRectF, QEvent
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtPrintSupport import *
@@ -2525,6 +2525,19 @@ class ResizeTreeView(QTreeView):
     def resizeEvent(self, event):
         self.itemDelegate().sizeHintChanged.emit(QModelIndex())
 
+    def mouseDoubleClickEvent(self, event):
+        self.edit(self.selectionModel().currentIndex())
+
+        editor = self.itemDelegate().item_editor
+        editor_top_left = editor.mapToParent(QPoint(0, 0))
+
+        editor.mousePressEvent(
+          QMouseEvent(QEvent.MouseButtonPress,
+                      event.localPos() - editor_top_left,
+                      event.windowPos(), event.screenPos(),
+                      Qt.LeftButton,
+                      event.buttons(), Qt.KeyboardModifier.NoModifier)
+        )
 
 class Spoiler(QWidget):
     # http://stackoverflow.com/questions/32476006/how-to-make-an-expandable-collapsable-section-widget-in-qt
