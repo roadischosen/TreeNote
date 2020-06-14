@@ -1476,6 +1476,7 @@ class MainWindow(QMainWindow):
                     self.current_view().setFocus()
         elif self.current_view().hasFocus():
             self.current_view().edit(current_index)
+            self.current_view().itemDelegate().item_editor.moveCursor(QTextCursor.End)
         else:
             self.current_view().setFocus()
 

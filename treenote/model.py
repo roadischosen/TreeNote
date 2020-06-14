@@ -972,6 +972,7 @@ class Delegate(QStyledItemDelegate):
             edit.setStyleSheet(
                 'AutoCompleteEdit {padding-left: ' + str(padding_left) + 'px; padding-top: ' +
                 str(self.main_window.padding - 1) + 'px;}')
+            self.item_editor = edit
             return edit
         if index.column() == 1:
             line_edit = QLineEdit(parent)
