@@ -925,7 +925,7 @@ class Delegate(QStyledItemDelegate):
         if option.state & QStyle.State_Selected:
             painter.fillRect(option.rect, option.palette.highlight())
         checkbox_size = QFontMetrics(QFont(FONT, self.main_window.fontsize)).height() - CHECKBOX_SMALLER
-        padding_x = checkbox_size if paint_task_icon else 1
+        padding_x = checkbox_size if paint_task_icon else 0
         painter.translate(option.rect.left() + padding_x, option.rect.top() + self.main_window.padding)
         document.drawContents(painter)
         painter.restore()
@@ -948,9 +948,7 @@ class Delegate(QStyledItemDelegate):
         document.setDefaultTextOption(textOption)
         if self.model.getItem(index).type != NOTE:
             available_width -= QFontMetrics(QFont(FONT, self.main_window.fontsize)).height() - CHECKBOX_SMALLER
-        # -2 because the createEditor is wider, and if we don't subtract here,
-        # there may happen line wrap when the user starts editing
-        document.setTextWidth(available_width - 2)
+        document.setTextWidth(available_width)
         document.setHtml(html)
         return document
 
@@ -990,6 +988,10 @@ class Delegate(QStyledItemDelegate):
             padding_left += QFontMetrics(QFont(FONT, self.main_window.fontsize)).height() - CHECKBOX_SMALLER
         # account for the possible task/project icon width
         option.rect.adjust(padding_left, 0, 0, 0)
+        # Compared to a regular text item w/ the same width, the editor is originally drawn (hopefully,
+        # for a good reason) to have 2 px less space to render its text on. This adjust stops the text
+        # from visually shifting and avoids uneccessary word wrapping changes.
+        option.rect.adjust(-1, 0, 1, 0)
         super().updateEditorGeometry(editor, option, index)
 
     def setEditorData(self, editor, index):
