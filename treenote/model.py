@@ -926,7 +926,7 @@ class Delegate(QStyledItemDelegate):
             painter.fillRect(option.rect, option.palette.highlight())
         checkbox_size = QFontMetrics(QFont(FONT, self.main_window.fontsize)).height() - CHECKBOX_SMALLER
         padding_x = checkbox_size if paint_task_icon else 1
-        painter.translate(option.rect.left() - 5 + padding_x, option.rect.top() + self.main_window.padding)
+        painter.translate(option.rect.left() + padding_x, option.rect.top() + self.main_window.padding)
         document.drawContents(painter)
         painter.restore()
 
@@ -948,9 +948,9 @@ class Delegate(QStyledItemDelegate):
         document.setDefaultTextOption(textOption)
         if self.model.getItem(index).type != NOTE:
             available_width -= QFontMetrics(QFont(FONT, self.main_window.fontsize)).height() - CHECKBOX_SMALLER
-        # +3 because the createEditor is wider, and if we don't add here,
+        # -2 because the createEditor is wider, and if we don't subtract here,
         # there may happen line wrap when the user starts editing
-        document.setTextWidth(available_width + 3)
+        document.setTextWidth(available_width - 2)
         document.setHtml(html)
         return document
 
@@ -985,7 +985,7 @@ class Delegate(QStyledItemDelegate):
             return date_edit
 
     def updateEditorGeometry(self, editor, option, index):
-        padding_left = -5
+        padding_left = 0
         if self.model.getItem(index).type != NOTE:
             padding_left += QFontMetrics(QFont(FONT, self.main_window.fontsize)).height() - CHECKBOX_SMALLER
         # account for the possible task/project icon width
