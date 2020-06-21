@@ -965,15 +965,10 @@ class Delegate(QStyledItemDelegate):
         if index.column() == 0:
             suggestions_list = list(self.main_window.item_model.get_tags_set(cut_delimiter=False, all_tags=True))
             tree_item_list = [item.text for item in self.main_window.item_model.items()]
-            edit = AutoCompleteEdit(parent, suggestions_list, tree_item_list, self)
-            padding_left = -5
-            if self.model.getItem(index).type != NOTE:
-                padding_left += QFontMetrics(QFont(FONT, self.main_window.fontsize)).height() - CHECKBOX_SMALLER
-            edit.setStyleSheet(
-                'AutoCompleteEdit {padding-left: ' + str(padding_left) + 'px; padding-top: ' +
-                str(self.main_window.padding - 1) + 'px;}')
-            self.item_editor = edit
-            return edit
+            self.item_editor = AutoCompleteEdit(parent, suggestions_list, tree_item_list, self)
+            self.item_editor.setStyleSheet(
+                'AutoCompleteEdit { padding-top: ' + str(self.main_window.padding - 1) + 'px;}')
+            return self.item_editor
         if index.column() == 1:
             line_edit = QLineEdit(parent)
             line_edit.setValidator(QIntValidator(0, 999, self))
@@ -988,6 +983,14 @@ class Delegate(QStyledItemDelegate):
             date_edit.setCalendarWidget(EscCalendarWidget(parent))
             date_edit.setStyleSheet('QDateEdit {padding-left: 14px;}')
             return date_edit
+
+    def updateEditorGeometry(self, editor, option, index):
+        padding_left = -5
+        if self.model.getItem(index).type != NOTE:
+            padding_left += QFontMetrics(QFont(FONT, self.main_window.fontsize)).height() - CHECKBOX_SMALLER
+        # account for the possible task/project icon width
+        option.rect.adjust(padding_left, 0, 0, 0)
+        super().updateEditorGeometry(editor, option, index)
 
     def setEditorData(self, editor, index):
         if isinstance(editor, QTextEdit):
