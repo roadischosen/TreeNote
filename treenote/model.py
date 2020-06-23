@@ -965,7 +965,7 @@ class Delegate(QStyledItemDelegate):
             tree_item_list = [item.text for item in self.main_window.item_model.items()]
             self.item_editor = AutoCompleteEdit(parent, suggestions_list, tree_item_list, self)
             self.item_editor.setStyleSheet(
-                'AutoCompleteEdit { padding-top: ' + str(self.main_window.padding - 1) + 'px;}')
+                'AutoCompleteEdit { padding-top: ' + str(self.main_window.padding) + 'px;}')
             return self.item_editor
         if index.column() == 1:
             line_edit = QLineEdit(parent)
@@ -988,10 +988,10 @@ class Delegate(QStyledItemDelegate):
             padding_left += QFontMetrics(QFont(FONT, self.main_window.fontsize)).height() - CHECKBOX_SMALLER
         # account for the possible task/project icon width
         option.rect.adjust(padding_left, 0, 0, 0)
-        # Compared to a regular text item w/ the same width, the editor is originally drawn (hopefully,
-        # for a good reason) to have 2 px less space to render its text on. This adjust stops the text
-        # from visually shifting and avoids uneccessary word wrapping changes.
-        option.rect.adjust(-1, 0, 1, 0)
+        # Compared to a regular text item w/ the same size, the editor is originally drawn (hopefully,
+        # for a good reason) to have 2 px less space on each axis to render its text on. This adjust
+        # stops the text from visually shifting and avoids unnecessary word wrapping changes.
+        option.rect.adjust(-1, -1, 1, 1)
         super().updateEditorGeometry(editor, option, index)
 
     def setEditorData(self, editor, index):
