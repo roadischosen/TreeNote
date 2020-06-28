@@ -1133,11 +1133,19 @@ class AutoCompleteEdit(QPlainTextEdit):
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.installEventFilter(self)
 
+        # +1 was determined empirically
+        self.row_height = QFontMetrics(QFont(FONT, self.delegate.main_window.fontsize)).lineSpacing() + 1
+        self.document().documentLayout().documentSizeChanged.connect(self.updateSize)
+
+    def updateSize(self):
+        if self.isVisible():
+            # +14 was determined empirically
+            target_height = self.document().size().height() * self.row_height + 14
+            if self.size().height() < target_height:
+                self.setFixedHeight(target_height)
+
     def eventFilter(self, obj, event):
-        if event.type() == QEvent.KeyPress and event.matches(QKeySequence.Paste):
-            line_breaks = QApplication.clipboard().text().count('\n')
-            self.increase_row_height_and_show_complete_editor(line_breaks)
-        elif event.type() == QEvent.ShortcutOverride and event.key() == Qt.Key_Tab:
+        if event.type() == QEvent.ShortcutOverride and event.key() == Qt.Key_Tab:
             self.delegate.main_window.edit_row()
         return False  # don't stop the event being handled further
 
@@ -1172,12 +1180,6 @@ class AutoCompleteEdit(QPlainTextEdit):
             i -= 1
         return textUnderCursor
 
-    def increase_row_height_and_show_complete_editor(self, added_rows):
-        rows = self.document().size().height()
-        font_height = QFontMetrics(QFont(FONT, self.delegate.main_window.fontsize)).height()
-        row_height = font_height + self.delegate.main_window.padding * 2
-        self.setFixedHeight(rows * row_height + added_rows * row_height)
-
     def keyPressEvent(self, event):
         # multiline editing
         if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
@@ -1186,7 +1188,6 @@ class AutoCompleteEdit(QPlainTextEdit):
                             event.modifiers() & Qt.AltModifier:
                 if event.modifiers() & Qt.AltModifier:  # fix alt + enter in Qt
                     event = QKeyEvent(QEvent.KeyPress, event.key(), Qt.NoModifier)
-                self.increase_row_height_and_show_complete_editor(1)
             else:  # complete edit on enter
                 if not self.tag_completer.popup().isVisible() and not self.internal_link_completer.popup().isVisible():
                     self.delegate.commitData.emit(self)
