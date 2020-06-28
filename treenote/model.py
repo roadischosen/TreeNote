@@ -370,8 +370,8 @@ class TreeModel(QAbstractItemModel):
                         parent_item.expanded = True
                         self.model.beginInsertRows(self.parent_index, self.position, self.position)
                         child = parent_item.add_child(self.position)
-                        # type of new items depends on their parent: note -> note, projekt -> task
-                        child.type = NOTE if parent_item.type == NOTE else TASK
+                        # type of new items depends on their parent: note, task -> note, projekt -> task
+                        child.type = NOTE if parent_item.type in [NOTE, TASK] else TASK
                         self.model.endInsertRows()
 
                         index_of_new_entry = self.model.index(self.position, 0, self.parent_index)
