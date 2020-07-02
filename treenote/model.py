@@ -20,10 +20,10 @@ def QDateFromString(string):
     return d
 
 
-def indention_level(index, level=1):
-    if index.parent() == QModelIndex():
+def indention_level(index, rel_to=QModelIndex(), level=1):
+    if index.parent() == rel_to:
         return level
-    return indention_level(index.parent(), level=level + 1)
+    return indention_level(index.parent(), rel_to=rel_to, level=level + 1)
 
 
 class QUndoCommandStructure(QUndoCommand):
@@ -955,7 +955,8 @@ class Delegate(QStyledItemDelegate):
     def sizeHint(self, option, index):
         html = escape(index.data())
         column_width = self.view_header.sectionSize(0)
-        document = self.create_document(index, html.replace('\n', '<br>'), column_width - indention_level(index) *
+        rootIndex = self.main_window.focused_column().view.rootIndex()
+        document = self.create_document(index, html.replace('\n', '<br>'), column_width - indention_level(index, rel_to=rootIndex) *
                                         self.main_window.focused_column().view.indentation())
         return QSize(0, document.size().height() + self.main_window.padding * 2)
 
