@@ -1176,8 +1176,11 @@ class AutoCompleteEdit(QPlainTextEdit):
         text = self.toPlainText()
         textUnderCursor = ''
         i = self.textCursor().position() - 1
-        while i >= 0 and text[i] != self._separator:
+        while i >= 0:
             textUnderCursor = text[i] + textUnderCursor
+            if text[i] in [INTERNAL_LINK_DELIMITER, TAG_DELIMITER]:
+                if i > 0 and text[i-1] == self._separator:
+                  break
             i -= 1
         return textUnderCursor
 
@@ -1271,7 +1274,7 @@ NUMBER_PLAN_DICT = {
 }
 TAG_DELIMITER = r':'
 INTERNAL_LINK_DELIMITER = r'#'
-FIND_INTERNAL_LINK = r'((\n|^| )(' + INTERNAL_LINK_DELIMITER + r'\w(\w| )+' + INTERNAL_LINK_DELIMITER + '))( |$)'
+FIND_INTERNAL_LINK = r'((\n|^| )(' + INTERNAL_LINK_DELIMITER + r'\S.+' + INTERNAL_LINK_DELIMITER + '))( |$)'
 DONE_TASK = 'done'  # same as icon file names
 TASK = 'todo'
 NOTE = 'note'
