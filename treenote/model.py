@@ -1007,6 +1007,13 @@ class Delegate(QStyledItemDelegate):
             self.closeEditor.emit(editor, QAbstractItemDelegate.NoHint)
             self.main_window.select_from_to(current_index, current_index)
             return False
+        if (event.type() == QEvent.FocusOut and
+                # active window changed
+                event.reason() == Qt.ActiveWindowFocusReason and
+                # but it's not one of ours ("Preferences", Print preview, etc)
+                QApplication.focusWidget() == None):
+            self.commitData.emit(self)
+            return True
         return QStyledItemDelegate.eventFilter(self, editor, event)
 
 
