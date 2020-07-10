@@ -874,6 +874,7 @@ class Delegate(QStyledItemDelegate):
         self.model = model
         self.main_window = main_window
         self.view_header = view_header
+        self.item_editor = None
 
     def paint(self, painter, option, index):
         item = self.model.getItem(index)
@@ -953,12 +954,15 @@ class Delegate(QStyledItemDelegate):
         return document
 
     def sizeHint(self, option, index):
-        html = escape(index.data())
-        column_width = self.view_header.sectionSize(0)
-        rootIndex = self.main_window.focused_column().view.rootIndex()
-        document = self.create_document(index, html.replace('\n', '<br>'), column_width - indention_level(index, rel_to=rootIndex) *
-                                        self.main_window.focused_column().view.indentation())
-        return QSize(0, document.size().height() + self.main_window.padding * 2)
+        if not self.item_editor or self.main_window.current_index() != index:
+            html = escape(index.data())
+            column_width = self.view_header.sectionSize(0)
+            rootIndex = self.main_window.focused_column().view.rootIndex()
+            document = self.create_document(index, html.replace('\n', '<br>'), column_width - indention_level(index, rel_to=rootIndex) *
+                                            self.main_window.focused_column().view.indentation())
+            return QSize(0, document.size().height() + self.main_window.padding * 2)
+        else:
+            return QSize(0, self.item_editor.size().height())
 
     def createEditor(self, parent, option, index):
         if index.column() == 0:
@@ -1000,6 +1004,11 @@ class Delegate(QStyledItemDelegate):
             editor.setPlainText(index.data())
         else:
             QStyledItemDelegate.setEditorData(self, editor, index)
+
+    def destroyEditor(self, editor, index):
+        self.item_editor = None
+        super().destroyEditor(editor, index)
+        self.sizeHintChanged.emit(index)
 
     def eventFilter(self, editor, event):
         if event.type() == QEvent.KeyPress and event.key() == Qt.Key_Escape:
@@ -1142,15 +1151,16 @@ class AutoCompleteEdit(QPlainTextEdit):
         self.installEventFilter(self)
 
         # +1 was determined empirically
-        self.row_height = QFontMetrics(QFont(FONT, self.delegate.main_window.fontsize)).lineSpacing() + 1
+        self.row_height = QFontMetrics(QFont(FONT, self.delegate.main_window.fontsize)).lineSpacing() + 0
         self.document().documentLayout().documentSizeChanged.connect(self.updateSize)
 
     def updateSize(self):
         if self.isVisible():
             # +14 was determined empirically
-            target_height = self.document().size().height() * self.row_height + 14
-            if self.size().height() < target_height:
+            target_height = self.document().size().height() * self.row_height + 10
+            if self.size().height() != target_height:
                 self.setFixedHeight(target_height)
+                self.delegate.sizeHintChanged.emit(self.delegate.main_window.current_index())
 
     def eventFilter(self, obj, event):
         if event.type() == QEvent.ShortcutOverride and event.key() == Qt.Key_Tab:
