@@ -996,8 +996,8 @@ class Delegate(QStyledItemDelegate):
         super().updateEditorGeometry(editor, option, index)
 
     def setEditorData(self, editor, index):
-        if isinstance(editor, QTextEdit):
-            editor.setText(index.data())
+        if isinstance(editor, QPlainTextEdit):
+            editor.setPlainText(index.data())
         else:
             QStyledItemDelegate.setEditorData(self, editor, index)
 
