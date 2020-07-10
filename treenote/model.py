@@ -1206,7 +1206,7 @@ class AutoCompleteEdit(QPlainTextEdit):
         completionPrefix = self.textUnderCursor()
         if completionPrefix and completionPrefix[0] == INTERNAL_LINK_DELIMITER:
             completionPrefix = completionPrefix[1:]
-        if len(completionPrefix) == 0:
+        if len(completionPrefix) == 0 or completionPrefix == TAG_DELIMITER:
             self.tag_completer.popup().hide()
             self.internal_link_completer.popup().hide()
             return
