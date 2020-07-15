@@ -869,13 +869,23 @@ class FilterProxyModel(QSortFilterProxyModel, ProxyTools):
 
 
 class Delegate(QStyledItemDelegate):
+    def w():
+        w = .2
+        while True:
+            if w >= 1.:
+                w = .2
+            yield w
+            w += .1
+
     def __init__(self, main_window, model, view_header):
         super(Delegate, self).__init__(main_window)
         self.model = model
         self.main_window = main_window
         self.view_header = view_header
+        self.i = iter(Delegate.w())
 
     def paint(self, painter, option, index):
+        '''
         item = self.model.getItem(index)
 
         html = escape(index.data())
@@ -909,16 +919,19 @@ class Delegate(QStyledItemDelegate):
         html = '<p style="white-space: pre-wrap">' + html + '</p>'
 
         document = self.create_document(index, html, option.rect.width())
+        '''
 
         painter.save()
         pen = QPen()
         pen.setBrush(option.palette.highlight())
-        pen.setWidthF(0.2)
+        pen.setWidthF(next(self.i))
         painter.setPen(pen)
         y = option.rect.bottomLeft().y()
+        if index.data().startswith('line'):
+            print(self.view_header.length(), option.rect.bottomLeft().y())
         painter.drawLine(0, y, self.view_header.length(), y)
         painter.restore()
-
+        '''
         paint_task_icon = item.type != NOTE and index.column() == 0
 
         painter.save()
@@ -937,7 +950,7 @@ class Delegate(QStyledItemDelegate):
             qImage = icon.scaledToHeight(checkbox_size)
             # place in the middle of the row
             painter.drawImage(option.rect.x(), option.rect.center().y() - qImage.height() / 2, qImage)
-            painter.restore()
+            painter.restore() #'''
 
     def create_document(self, index, html, available_width):
         document = QTextDocument()
