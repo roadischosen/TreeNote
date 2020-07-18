@@ -7,7 +7,7 @@ import sys
 from xml.sax.saxutils import escape
 
 from PyQt5.QtCore import QAbstractItemModel, QModelIndex, QSortFilterProxyModel, QSize, Qt, QEvent, \
-    QPersistentModelIndex, QDate
+    QPersistentModelIndex, QDate, QRectF, QPointF, QSizeF
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
@@ -928,7 +928,7 @@ class Delegate(QStyledItemDelegate):
         checkbox_size = QFontMetrics(QFont(FONT, self.main_window.fontsize)).height() - CHECKBOX_SMALLER
         padding_x = checkbox_size if paint_task_icon else 0
         painter.translate(option.rect.left() + padding_x, option.rect.top() + self.main_window.padding)
-        document.drawContents(painter)
+        document.drawContents(painter, QRectF(QPointF(0, 0), QSizeF(option.rect.size())))
         painter.restore()
 
         if paint_task_icon:
@@ -962,7 +962,7 @@ class Delegate(QStyledItemDelegate):
                                             self.main_window.focused_column().view.indentation())
             return QSize(0, document.size().height() + self.main_window.padding * 2)
         else:
-            return QSize(0, self.item_editor.size().height())
+            return QSize(0, self.item_editor.size().height()-2)
 
     def createEditor(self, parent, option, index):
         if index.column() == 0:
@@ -997,6 +997,7 @@ class Delegate(QStyledItemDelegate):
         # for a good reason) to have 2 px less space on each axis to render its text on. This adjust
         # stops the text from visually shifting and avoids unnecessary word wrapping changes.
         option.rect.adjust(-1, -1, 1, 1)
+        print('updateEditorGeometry', self.item_editor.size(), option.rect.size())
         super().updateEditorGeometry(editor, option, index)
 
     def setEditorData(self, editor, index):
@@ -1151,16 +1152,22 @@ class AutoCompleteEdit(QPlainTextEdit):
         self.installEventFilter(self)
 
         # +1 was determined empirically
-        self.row_height = QFontMetrics(QFont(FONT, self.delegate.main_window.fontsize)).lineSpacing() + 0
+        self.row_height = QFontMetrics(QFont(FONT, self.delegate.main_window.fontsize)).lineSpacing() + 1
         self.document().documentLayout().documentSizeChanged.connect(self.updateSize)
 
     def updateSize(self):
         if self.isVisible():
             # +14 was determined empirically
-            target_height = self.document().size().height() * self.row_height + 10
+            target_height = self.document().size().height() * self.row_height + 2 + 8 + 2*self.delegate.main_window.padding
             if self.size().height() != target_height:
                 self.setFixedHeight(target_height)
                 self.delegate.sizeHintChanged.emit(self.delegate.main_window.current_index())
+                print('us', self.size())
+                print(self.contentsMargins().top(), self.contentsMargins().bottom(), self.frameWidth(), self.document().documentMargin())
+
+    def mousePressEvent(self, event):
+        print('editor mouse',event.localPos())
+        super().mousePressEvent(event)
 
     def eventFilter(self, obj, event):
         if event.type() == QEvent.ShortcutOverride and event.key() == Qt.Key_Tab:
